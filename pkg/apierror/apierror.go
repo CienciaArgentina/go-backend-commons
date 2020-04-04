@@ -79,9 +79,9 @@ type ApiError interface {
 	Status() int
 	Message() string
 	Error() ErrorList
-	WithStatus(status int)
-	WithMessage(message string)
-	AddError(message, code string)
+	WithStatus(status int) *apiError
+	WithMessage(message string) *apiError
+	AddError(message, code string) *apiError
 }
 
 type apiError struct {
@@ -129,8 +129,9 @@ func (e ErrorList) ToString() string {
 	return str
 }
 
-func (a *apiError) AddError(message, code string) {
+func (a *apiError) AddError(message, code string) *apiError {
 	a.ErrError = append(a.ErrError, ErrorCause{message, code})
+	return a
 }
 
 func (a *apiError) WithStatus(status int) *apiError {
