@@ -79,22 +79,28 @@ type ApiError interface {
 	Status() int
 	Message() string
 	Error() ErrorList
+	WithStatus(status int)
+	WithMessage(message string)
 	AddError(message, code string)
 }
 
 type apiError struct {
-	ErrStatus int `json:"status"`
-	ErrMessage string `json:"message"`
-	ErrError ErrorList `json:"error"`
+	ErrStatus  int       `json:"status"`
+	ErrMessage string    `json:"message"`
+	ErrError   ErrorList `json:"error"`
 }
 
 type ErrorCause struct {
 	Detail string `json:"detail"`
-	Code string `json:"code"`
+	Code   string `json:"code"`
 }
 
 func New(status int, message string, error ErrorList) ApiError {
-	return &apiError{ErrStatus:status, ErrMessage:message, ErrError:error}
+	return &apiError{ErrStatus: status, ErrMessage: message, ErrError: error}
+}
+
+func NewWithStatus(status int) ApiError {
+	return &apiError{ErrStatus: status}
 }
 
 func NewErrorCause(detail, code string) ErrorList {
@@ -123,8 +129,16 @@ func (e ErrorList) ToString() string {
 	return str
 }
 
-func (a *apiError) AddError(message, code string)  {
+func (a *apiError) AddError(message, code string) {
 	a.ErrError = append(a.ErrError, ErrorCause{message, code})
+}
+
+func (a *apiError) WithStatus(status int) {
+	a.ErrStatus = status
+}
+
+func (a *apiError) WithMessage(message string) {
+	a.ErrMessage = message
 }
 
 func NewNotFoundApiError(message string) ApiError {
@@ -136,7 +150,7 @@ func NewBadRequestApiError(message string) ApiError {
 }
 
 func NewMethodNotAllowedApiError() ApiError {
-	return &apiError{http.StatusMethodNotAllowed, "Method not allowed", NewErrorCause("Method not allowed","method_not_allowed")}
+	return &apiError{http.StatusMethodNotAllowed, "Method not allowed", NewErrorCause("Method not allowed", "method_not_allowed")}
 }
 
 func NewInternalServerApiError(message string, err error) ApiError {

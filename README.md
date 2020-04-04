@@ -2,6 +2,16 @@
 
 ## Changelog
 
+### 0.0.3 - 03042020
+
+#### Added
+- API error builder
+
+#### Changed
+
+
+#### Removed
+
 ### 0.0.2 - 30032020
 
 #### Added
