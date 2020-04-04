@@ -133,12 +133,14 @@ func (a *apiError) AddError(message, code string) {
 	a.ErrError = append(a.ErrError, ErrorCause{message, code})
 }
 
-func (a *apiError) WithStatus(status int) {
+func (a *apiError) WithStatus(status int) *apiError {
 	a.ErrStatus = status
+	return a
 }
 
-func (a *apiError) WithMessage(message string) {
+func (a *apiError) WithMessage(message string) *apiError {
 	a.ErrMessage = message
+	return a
 }
 
 func NewNotFoundApiError(message string) ApiError {
