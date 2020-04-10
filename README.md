@@ -2,6 +2,15 @@
 
 ## Changelog
 
+### 0.0.8 - 10042020
+
+#### Added
+- Go modules
+
+#### Changed
+
+#### Removed
+
 ### 0.0.7 - 10042020
 
 #### Added

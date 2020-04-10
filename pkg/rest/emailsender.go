@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"github.com/CienciaArgentina/go-email-sender/commons"
 	"github.com/CienciaArgentina/go-enigma/config"
-	"github.com/go-resty/resty"
+	 "github.com/go-resty/resty/v2"
 )
 
 func EmailSenderApiCall(cfg *config.Microservices, dto *commons.DTO) (bool, error, string) {
