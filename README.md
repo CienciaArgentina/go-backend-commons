@@ -21,6 +21,33 @@
 
 #### Removed
 
+### 0.0.5 - 10042020
+
+#### Added
+- Email sender wrapper
+
+#### Changed
+
+#### Removed
+
+### 0.0.4 - 30032020
+
+#### Added
+
+#### Changed
+- API error refactor
+
+#### Removed
+
+### 0.0.3 - 30032020
+
+#### Added
+
+#### Changed
+- API error builder
+
+#### Removed
+
 ### 0.0.2 - 30032020
 
 #### Added
