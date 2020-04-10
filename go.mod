@@ -1,6 +1,6 @@
 module github.com/CienciaArgentina/go-backend-commons
 
-go 1.13
+go 1.14
 
 require (
 	github.com/CienciaArgentina/go-email-sender v0.0.0-20200321235251-5f1590a48489
