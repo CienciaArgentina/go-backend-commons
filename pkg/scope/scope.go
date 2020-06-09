@@ -39,6 +39,10 @@ func IsStaging() bool {
 	return strings.EqualFold(GetScope(), Staging) && IsCloud()
 }
 
+func IsProductiveScope() bool {
+	return IsProduction() || IsStaging()
+}
+
 func IsTesting() bool {
 	return strings.EqualFold(GetScope(), Testing) && IsCloud()
 }
