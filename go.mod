@@ -7,4 +7,5 @@ require (
 	github.com/CienciaArgentina/go-enigma v0.0.0-20200330021150-49a56be20f2a
 	github.com/go-resty/resty/v2 v2.2.0
 	github.com/stretchr/testify v1.5.1
+	gopkg.in/yaml.v2 v2.2.8
 )

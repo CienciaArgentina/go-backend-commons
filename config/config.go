@@ -8,8 +8,9 @@ import (
 )
 
 type Config struct {
+	ApiKey   string     `yaml:"apikey"`
 	Database []Database `yaml:"database"`
-	Server Server `yaml:"server"`
+	Server   Server     `yaml:"server"`
 }
 
 type Database struct {
@@ -26,8 +27,8 @@ type Server struct {
 
 type Options struct {
 	FilePath string
-	Scope string
-	IsCloud bool
+	Scope    string
+	IsCloud  bool
 }
 
 func New(o ...*Options) *Config {

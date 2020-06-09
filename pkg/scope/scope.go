@@ -7,15 +7,14 @@ import (
 )
 
 const (
-
-	Scope = "SCOPE"
+	Scope      = "SCOPE"
 	IsCloudKey = "IS_CLOUD"
 
-	Local = "local"
+	Local       = "local"
 	Development = "development"
-	Testing = "testing"
-	Staging = "staging"
-	Production = "production"
+	Testing     = "testing"
+	Staging     = "staging"
+	Production  = "production"
 )
 
 func GetScope() string {
