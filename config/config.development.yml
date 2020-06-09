@@ -1,1 +1,6 @@
 apikey: "commons"
+database:
+  - hostname: "db_host"
+    password: "db_pass"
+    username: "root"
+    database: "db"

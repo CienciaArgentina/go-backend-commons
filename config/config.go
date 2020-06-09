@@ -15,10 +15,9 @@ type Config struct {
 
 type Database struct {
 	Username string `yaml:"username"`
-	Password string `envconfig:"ENV_DB_PASSWORD"`
-	Hostname string `envconfig:"ENV_DB_HOSTNAME"`
-	Port     string `yaml:"port"`
-	Database string `envconfig:"ENV_DB_NAME"`
+	Password string `yaml:"password"` // This is the name of the environment variable, not the actual value
+	Hostname string `yaml:"hostname"` // This is the name of the environment variable, not the actual value
+	Database string `yaml:"database"`
 }
 
 type Server struct {
