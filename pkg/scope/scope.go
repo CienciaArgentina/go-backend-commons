@@ -7,15 +7,14 @@ import (
 )
 
 const (
-
-	Scope = "SCOPE"
+	Scope      = "SCOPE"
 	IsCloudKey = "IS_CLOUD"
 
-	Local = "local"
+	Local       = "local"
 	Development = "development"
-	Testing = "testing"
-	Staging = "staging"
-	Production = "production"
+	Testing     = "testing"
+	Staging     = "staging"
+	Production  = "production"
 )
 
 func GetScope() string {
@@ -37,6 +36,10 @@ func IsProduction() bool {
 
 func IsStaging() bool {
 	return strings.EqualFold(GetScope(), Staging) && IsCloud()
+}
+
+func IsProductiveScope() bool {
+	return IsProduction() || IsStaging()
 }
 
 func IsTesting() bool {

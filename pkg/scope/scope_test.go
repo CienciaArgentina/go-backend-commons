@@ -67,3 +67,7 @@ func TestIsLocalShouldReturnTrue(t *testing.T) {
 	os.Setenv(Scope, tmp)
 	require.True(t, isLocal)
 }
+
+func TestIsProductiveScope(t *testing.T) {
+	require.False(t, IsProductiveScope())
+}

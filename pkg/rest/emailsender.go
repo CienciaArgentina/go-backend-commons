@@ -14,7 +14,6 @@ func EmailSenderApiCall(cfg *config.Microservices, dto *commons.DTO) (bool, erro
 		R().
 		SetBody(dto).Post(fmt.Sprintf("%s%s", cfg.BaseUrl, cfg.EmailSenderEndpoints.SendEmail))
 
-
 	if err != nil || res.IsError() {
 		return false, err, res.String()
 	}

@@ -1,8 +1,16 @@
 package config
 
+import (
+	"fmt"
+	"github.com/CienciaArgentina/go-backend-commons/pkg/scope"
+	"gopkg.in/yaml.v2"
+	"io/ioutil"
+)
+
 type Config struct {
+	ApiKey   string     `yaml:"apikey"`
 	Database []Database `yaml:"database"`
-	Server Server `yaml:"server"`
+	Server   Server     `yaml:"server"`
 }
 
 type Database struct {
@@ -19,16 +27,50 @@ type Server struct {
 
 type Options struct {
 	FilePath string
-	Scope string
-	IsCloud bool
+	Scope    string
+	IsCloud  bool
 }
 
 func New(o ...*Options) *Config {
 	c := &Config{}
 
-	//if o == nil || o[0] == nil {
-	//	o := SetDefaultOptions()
-	//}
+	if o == nil {
+		o = []*Options{}
+	}
+
+	if o[0] == nil {
+		o[0] = SetDefaultOptions()
+	}
+
+	if o[0].Scope == "" {
+		if scope.IsCloud() {
+			if scope.IsProductiveScope() {
+				o[0].Scope = scope.GetScope()
+			} else {
+				o[0].Scope = scope.Development
+			}
+		} else {
+			o[0].Scope = scope.Local
+		}
+	}
+
+	var data []byte
+	var err error
+
+	if o[0].FilePath == "" {
+		data, err = ioutil.ReadFile(fmt.Sprintf("./config/config.%s.yml", o[0].Scope))
+	} else {
+		data, err = ioutil.ReadFile(o[0].FilePath)
+	}
+
+	if err != nil {
+		panic(err)
+	}
+
+	err = yaml.Unmarshal(data, &c)
+	if err != nil {
+		panic(err)
+	}
 
 	return c
 }
@@ -36,7 +78,7 @@ func New(o ...*Options) *Config {
 func SetDefaultOptions() *Options {
 	return &Options{
 		FilePath: "",
-		Scope:    "",
+		Scope:    scope.Local,
 		IsCloud:  false,
 	}
 }
