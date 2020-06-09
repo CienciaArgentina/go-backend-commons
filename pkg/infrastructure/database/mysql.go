@@ -11,20 +11,20 @@ import (
 )
 
 const (
-	MySQL= "mysql"
+	MySQL = "mysql"
 )
 
 type Database struct {
 	Database *sqlx.DB
-	Mock sqlmock.Sqlmock
+	Mock     sqlmock.Sqlmock
 }
 
 func New(cfg *config.Database) (*Database, string) {
 	if scope.IsTesting() {
 		db, mock, _ := sqlmock.New()
 		defer db.Close()
-		sqlxDb := sqlx.NewDb(db,"sqlmock")
-		return &Database{Database:sqlxDb, Mock: mock}, cfg.Database
+		sqlxDb := sqlx.NewDb(db, "sqlmock")
+		return &Database{Database: sqlxDb, Mock: mock}, cfg.Database
 	}
 
 	if cfg.Username == "" || cfg.Database == "" || cfg.Hostname == "" || cfg.Password == "" {
@@ -46,7 +46,7 @@ func New(cfg *config.Database) (*Database, string) {
 		panic(err)
 	}
 
-	return &Database{Database:db}, dbName
+	return &Database{Database: db}, dbName
 }
 
 func FormatDbName(dbname string) string {
