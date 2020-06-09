@@ -33,10 +33,12 @@ func New(cfg *config.Database) (*Database, string) {
 
 	dbName := FormatDbName(cfg.Database)
 
-	password := os.Getenv(cfg.Password)
-	hostname := os.Getenv(cfg.Hostname)
+	if actualScope := scope.GetScope(); actualScope != scope.Local {
+		cfg.Password = os.Getenv(cfg.Password)
+		cfg.Hostname = os.Getenv(cfg.Hostname)
+	}
 
-	if password == "" || hostname == "" {
+	if cfg.Password == "" || cfg.Hostname == "" {
 		panic("There's no environment variable with a valid password or hostname")
 	}
 
