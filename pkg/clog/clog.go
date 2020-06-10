@@ -9,32 +9,32 @@ import (
 
 /*
  (C)iencia Argentina (Log)ger
- */
+*/
 
 var (
 	Logger *logrus.Logger
 
 	TraceLevel = logrus.TraceLevel
 	DebugLevel = logrus.DebugLevel
-	InfoLevel = logrus.InfoLevel
-	WarnLevel = logrus.WarnLevel
+	InfoLevel  = logrus.InfoLevel
+	WarnLevel  = logrus.WarnLevel
 	ErrorLevel = logrus.ErrorLevel
 	FatalLevel = logrus.FatalLevel
 	PanicLevel = logrus.PanicLevel
 )
 
 const (
-	Level = "level"
-	Type = "type"
+	Level   = "level"
+	Type    = "type"
 	Subtype = "subtype"
 )
 
 func init() {
 	Logger = &logrus.Logger{
-		Out:          os.Stdout,
-		Hooks:        make(logrus.LevelHooks),
-		Formatter:    &logrus.JSONFormatter{},
-		Level:        InfoLevel,
+		Out:       os.Stdout,
+		Hooks:     make(logrus.LevelHooks),
+		Formatter: &logrus.JSONFormatter{},
+		Level:     InfoLevel,
 	}
 }
 
@@ -88,7 +88,7 @@ func Warn(message, logType string, tags map[string]string) {
 	}
 }
 
-func Error(message, logType string, err error,tags map[string]string) {
+func Error(message, logType string, err error, tags map[string]string) {
 	if Logger.Level >= logrus.ErrorLevel {
 		if tags == nil {
 			tags = make(map[string]string)
@@ -100,7 +100,7 @@ func Error(message, logType string, err error,tags map[string]string) {
 	}
 }
 
-func Panic(message, logType string, err error,tags map[string]string) {
+func Panic(message, logType string, err error, tags map[string]string) {
 	if Logger.Level >= logrus.PanicLevel {
 		if tags == nil {
 			tags = make(map[string]string)
