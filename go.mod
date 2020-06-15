@@ -8,7 +8,6 @@ require (
 	github.com/DATA-DOG/go-sqlmock v1.4.1
 	github.com/go-resty/resty/v2 v2.2.0
 	github.com/jmoiron/sqlx v1.2.0
-	github.com/sirupsen/logrus v1.5.0
 	github.com/stretchr/testify v1.5.1
 	gopkg.in/yaml.v2 v2.2.8
 )
