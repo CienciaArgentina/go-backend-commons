@@ -11,9 +11,9 @@ import (
 type Controller func(c *gin.Context) error
 
 const (
-	// ResponseCodeKey Key that's search for in gin.Context to set response status code
+	// ResponseCodeKey Key that's searched for in gin.Context to set response status code
 	ResponseCodeKey = "responseCode"
-	// ResponseBodyKey Key that's search for in gin.Context to set response body
+	// ResponseBodyKey Key that's searched for in gin.Context to set response body
 	ResponseBodyKey = "responseBody"
 )
 
