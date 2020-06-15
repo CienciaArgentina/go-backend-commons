@@ -39,7 +39,7 @@ func ResponseMiddleware(c *gin.Context) {
 	code := http.StatusOK
 	if apiCode, exists := c.Get(ResponseCodeKey); exists {
 		var ok bool
-		apiCode, ok = apiCode.(int)
+		code, ok = apiCode.(int)
 		if !ok {
 			// TODO: Should this panic? Or set an error in context instead?
 			apiCode = http.StatusOK
@@ -52,34 +52,34 @@ func ResponseMiddleware(c *gin.Context) {
 	}
 
 	err := apiErrors.NewInternalServerApiError("Expected a response body", nil)
-	c.Error(err)
-	c.Abort()
+	c.AbortWithError(err.Status(), err)
 }
 
 // ErrorMiddleware Error handling middleware
 func ErrorMiddleware(c *gin.Context) {
 	c.Next()
+	if len(c.Errors) == 0 {
+		return
+	}
 
-	if len(c.Errors) > 0 {
-		errorMsgs := []string{}
+	errorMsgs := []string{}
 
-		for _, ginErr := range c.Errors {
-			apiErr, ok := ginErr.Err.(apiErrors.ApiError)
+	for _, ginErr := range c.Errors {
+		apiErr, ok := ginErr.Err.(apiErrors.ApiError)
 
-			if ok {
-				errorMsgs = append(errorMsgs, apiErr.Error())
-				continue
-			}
-
-			errorMsgs = append(errorMsgs, ginErr.Err.Error())
+		if ok {
+			errorMsgs = append(errorMsgs, apiErr.Error())
+			continue
 		}
 
-		msg := fmt.Sprintf("[%s]", strings.Join(errorMsgs, ", "))
-		apiErr := apiErrors.NewInternalServerApiError(msg, nil)
+		errorMsgs = append(errorMsgs, ginErr.Err.Error())
+	}
 
-		c.JSON(apiErr.Status(), apiErr)
-		if !c.IsAborted() {
-			c.AbortWithStatus(apiErr.Status())
-		}
+	msg := fmt.Sprintf("[%s]", strings.Join(errorMsgs, ", "))
+	apiErr := apiErrors.NewInternalServerApiError(msg, nil)
+
+	c.JSON(apiErr.Status(), apiErr)
+	if !c.IsAborted() {
+		c.AbortWithStatus(apiErr.Status())
 	}
 }
