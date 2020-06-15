@@ -1,8 +1,9 @@
 package apierror
 
 import (
-	"github.com/CienciaArgentina/go-backend-commons/pkg/json"
 	"net/http"
+
+	"github.com/CienciaArgentina/go-backend-commons/pkg/json"
 )
 
 type ErrorList []interface{}
@@ -10,7 +11,7 @@ type ErrorList []interface{}
 type ApiError interface {
 	Status() int
 	Message() string
-	Error() ErrorList
+	Error() string
 	WithStatus(status int) *apiError
 	WithMessage(message string) *apiError
 	AddError(message, code string) *apiError
@@ -52,11 +53,11 @@ func (a *apiError) Message() string {
 	return a.errMessage
 }
 
-func (a *apiError) Error() ErrorList {
-	return a.errError
+func (a *apiError) Error() string {
+	return a.errError.String()
 }
 
-func (e ErrorList) ToString() string {
+func (e ErrorList) String() string {
 	str, _ := json.ToJSONString(e)
 	return str
 }
