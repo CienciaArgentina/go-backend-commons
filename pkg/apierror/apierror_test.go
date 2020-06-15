@@ -1,9 +1,10 @@
 package apierror
 
 import (
-	"github.com/stretchr/testify/require"
 	"net/http"
 	"testing"
+
+	"github.com/stretchr/testify/require"
 )
 
 func TestNewShouldReturnNewApiError(t *testing.T) {
@@ -31,7 +32,7 @@ func TestNewErrorCauseShouldCreateNewErrorList(t *testing.T) {
 	err := NewErrorCause(detail, code)
 
 	require.NotNil(t, err)
-	require.Equal(t, "[{\"detail\":\"Testing\",\"code\":\"testing_code\"}]", err.ToString())
+	require.Equal(t, "[{\"detail\":\"Testing\",\"code\":\"testing_code\"}]", err.String())
 }
 
 func TestAddErrorShouldAddError(t *testing.T) {
@@ -44,7 +45,7 @@ func TestAddErrorShouldAddError(t *testing.T) {
 	require.NotNil(t, err)
 	require.Equal(t, code, err.Status())
 	require.Equal(t, msg, err.Message())
-	require.Equal(t, "[{\"detail\":\"AddError err\",\"code\":\"adding_error_code\"}]", err.Error().ToString())
+	require.Equal(t, "[{\"detail\":\"AddError err\",\"code\":\"adding_error_code\"}]", err.Error())
 	require.IsType(t, &apiError{}, err)
 }
 
