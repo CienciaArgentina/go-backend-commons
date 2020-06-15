@@ -1,9 +1,7 @@
 package middleware
 
 import (
-	"fmt"
 	"net/http"
-	"strings"
 
 	apiErrors "github.com/CienciaArgentina/go-backend-commons/pkg/apierror"
 	"github.com/gin-gonic/gin"
@@ -62,21 +60,11 @@ func ErrorMiddleware(c *gin.Context) {
 		return
 	}
 
-	errorMsgs := []string{}
-
-	for _, ginErr := range c.Errors {
-		apiErr, ok := ginErr.Err.(apiErrors.ApiError)
-
-		if ok {
-			errorMsgs = append(errorMsgs, apiErr.Error())
-			continue
-		}
-
-		errorMsgs = append(errorMsgs, ginErr.Err.Error())
+	ginErr := c.Errors.Last()
+	apiErr := apiErrors.NewInternalServerApiError("Internal server error", ginErr)
+	if ginAPIErr, ok := ginErr.Err.(apiErrors.ApiError); ok {
+		apiErr = ginAPIErr
 	}
-
-	msg := fmt.Sprintf("[%s]", strings.Join(errorMsgs, ", "))
-	apiErr := apiErrors.NewInternalServerApiError(msg, nil)
 
 	c.JSON(apiErr.Status(), apiErr)
 	if !c.IsAborted() {

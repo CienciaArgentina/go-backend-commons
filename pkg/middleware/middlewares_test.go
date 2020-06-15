@@ -6,6 +6,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	apiErrors "github.com/CienciaArgentina/go-backend-commons/pkg/apierror"
 	"github.com/gin-gonic/gin"
 )
 
@@ -104,6 +105,62 @@ func TestResponseMiddlewareNoBody(t *testing.T) {
 
 	r.Use(ResponseMiddleware)
 	r.GET("/test", func(c *gin.Context) {
+	})
+
+	c.Request, _ = http.NewRequest(http.MethodGet, "/test", nil)
+	r.ServeHTTP(resp, c.Request)
+
+	if resp.Result().StatusCode != expectedStatusCode {
+		t.Errorf("Expected status code %d but got %d", expectedStatusCode, resp.Result().StatusCode)
+	}
+}
+
+func TestErrorMiddlewareNoError(t *testing.T) {
+	resp := httptest.NewRecorder()
+	expectedStatusCode := http.StatusOK
+	gin.SetMode(gin.TestMode)
+	c, r := gin.CreateTestContext(resp)
+
+	r.Use(ErrorMiddleware)
+	r.GET("/test", func(c *gin.Context) {
+	})
+
+	c.Request, _ = http.NewRequest(http.MethodGet, "/test", nil)
+	r.ServeHTTP(resp, c.Request)
+
+	if resp.Result().StatusCode != expectedStatusCode {
+		t.Errorf("Expected status code %d but got %d", expectedStatusCode, resp.Result().StatusCode)
+	}
+}
+
+func TestErrorMiddlewareGinError(t *testing.T) {
+	resp := httptest.NewRecorder()
+	expectedStatusCode := http.StatusInternalServerError
+	gin.SetMode(gin.TestMode)
+	c, r := gin.CreateTestContext(resp)
+
+	r.Use(ErrorMiddleware)
+	r.GET("/test", func(c *gin.Context) {
+		c.Error(errors.New("This isn't an API error"))
+	})
+
+	c.Request, _ = http.NewRequest(http.MethodGet, "/test", nil)
+	r.ServeHTTP(resp, c.Request)
+
+	if resp.Result().StatusCode != expectedStatusCode {
+		t.Errorf("Expected status code %d but got %d", expectedStatusCode, resp.Result().StatusCode)
+	}
+}
+func TestErrorMiddlewareAPIError(t *testing.T) {
+	resp := httptest.NewRecorder()
+	expectedStatusCode := http.StatusForbidden
+	gin.SetMode(gin.TestMode)
+	c, r := gin.CreateTestContext(resp)
+
+	r.Use(ErrorMiddleware)
+	r.GET("/test", func(c *gin.Context) {
+		err := apiErrors.NewForbiddenApiError("You shall not pass!")
+		c.Error(err)
 	})
 
 	c.Request, _ = http.NewRequest(http.MethodGet, "/test", nil)
