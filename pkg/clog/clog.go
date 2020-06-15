@@ -10,7 +10,6 @@ import (
 /*
  (C)iencia Argentina (Log)ger
 */
-
 var (
 	Logger *logrus.Logger
 
