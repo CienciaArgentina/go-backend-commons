@@ -1,9 +1,10 @@
 package apierror
 
 import (
+	"encoding/json"
 	"net/http"
 
-	"github.com/CienciaArgentina/go-backend-commons/pkg/json"
+	j "github.com/CienciaArgentina/go-backend-commons/pkg/json"
 )
 
 type ErrorList []interface{}
@@ -58,7 +59,7 @@ func (a *apiError) Error() string {
 }
 
 func (e ErrorList) String() string {
-	str, _ := json.ToJSONString(e)
+	str, _ := j.ToJSONString(e)
 	return str
 }
 
@@ -103,4 +104,13 @@ func NewForbiddenApiError(message string) ApiError {
 
 func NewUnauthorizedApiError(message string) ApiError {
 	return &apiError{http.StatusUnauthorized, message, NewErrorCause(message, "unauthorized_scopes")}
+}
+
+func NewErrorFromBytesWithStatus(data []byte, status int) (ApiError, error) {
+	var apierror apiError
+	err := json.Unmarshal(data, status)
+	if apierror.errStatus == 0 {
+		apierror.WithStatus(status)
+	}
+	return &apierror, err
 }
