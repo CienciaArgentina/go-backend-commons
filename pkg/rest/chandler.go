@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/CienciaArgentina/go-backend-commons/pkg/apierror"
+	"github.com/CienciaArgentina/go-backend-commons/pkg/auth"
 	"github.com/CienciaArgentina/go-backend-commons/pkg/clog"
 	"github.com/CienciaArgentina/go-backend-commons/pkg/scope"
 	"github.com/gin-gonic/gin"
@@ -114,7 +115,7 @@ func apiFilter() gin.HandlerFunc {
 }
 
 func internalServerErrorHandler(c *gin.Context, body []byte, status int) []byte {
-	if IsPublicRequest(c.Request) {
+	if auth.IsPublicRequest(c.Request) {
 		msg, _ := json.Marshal(apierror.NewInternalServerApiError("Ocurrió un error en el servidor, por favor intentar nuevamente", nil))
 		return msg
 	}
