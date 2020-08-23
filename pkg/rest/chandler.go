@@ -6,11 +6,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/CienciaArgentina/go-backend-commons/pkg/apierror"
-	"github.com/CienciaArgentina/go-backend-commons/pkg/auth"
-	"github.com/CienciaArgentina/go-backend-commons/pkg/clog"
-	"github.com/CienciaArgentina/go-backend-commons/pkg/scope"
-	"github.com/gin-gonic/gin"
 	"io"
 	"io/ioutil"
 	"log"
@@ -19,6 +14,12 @@ import (
 	"net/http/httputil"
 	"runtime"
 	"strconv"
+
+	"github.com/CienciaArgentina/go-backend-commons/pkg/apierror"
+	"github.com/CienciaArgentina/go-backend-commons/pkg/auth"
+	"github.com/CienciaArgentina/go-backend-commons/pkg/clog"
+	"github.com/CienciaArgentina/go-backend-commons/pkg/scope"
+	"github.com/gin-gonic/gin"
 )
 
 func CustomCienciaArgentinaRouter() *gin.Engine {
@@ -35,9 +36,9 @@ func CustomCienciaArgentinaRouter() *gin.Engine {
 }
 
 type customWritter struct {
-	ctx *gin.Context
-	response gin.ResponseWriter
-	body *bytes.Buffer
+	ctx          *gin.Context
+	response     gin.ResponseWriter
+	body         *bytes.Buffer
 	writtenBytes int
 }
 
@@ -51,7 +52,7 @@ func (c *customWritter) Write(b []byte) (int, error) {
 	}
 
 	size, err := c.body.Write(b)
-	c.writtenBytes = c.writtenBytes + size
+	c.writtenBytes += size
 	return size, err
 }
 
@@ -108,7 +109,7 @@ func apiFilter() gin.HandlerFunc {
 		if len(bodyBytes) > 0 {
 			cw.body.Reset()
 			cw.writtenBytes = len(bodyBytes)
-			cw.response.Write(bodyBytes)
+			cw.response.Write(bodyBytes) // nolint
 		}
 		cw.Header().Set(HeaderContentLength, strconv.Itoa(cw.writtenBytes))
 	}
@@ -125,11 +126,10 @@ func internalServerErrorHandler(c *gin.Context, body []byte, status int) []byte 
 	return parsedError
 }
 
-
 func recoverPanic(o io.Writer) gin.HandlerFunc {
 	var logger *log.Logger
 	if o != nil {
-		logger = log.New(o,"\n\n\x1b[31m", log.LstdFlags)
+		logger = log.New(o, "\n\n\x1b[31m", log.LstdFlags)
 	}
 	return func(c *gin.Context) {
 		defer func() {
@@ -141,6 +141,7 @@ func recoverPanic(o io.Writer) gin.HandlerFunc {
 					pInfo := fmt.Sprintf("[RECOVERY] Panic recovered: \n%s\n%s\n%s%s", string(request), err, stack, []byte{27, 91, 48, 109})
 					logger.Printf(pInfo)
 				}
+
 				c.AbortWithStatusJSON(http.StatusInternalServerError, apierror.NewInternalServerApiError("Error interno del servidor, panic", errors.New(pInfo), "internal_server_error"))
 			}
 		}()
