@@ -1,7 +1,9 @@
 package injector
 
 import (
+	"errors"
 	"github.com/CienciaArgentina/go-backend-commons/config"
+	"github.com/CienciaArgentina/go-backend-commons/pkg/clog"
 	"github.com/CienciaArgentina/go-backend-commons/pkg/infrastructure/database"
 )
 
@@ -15,10 +17,16 @@ func GetDB(name string) *database.Database {
 }
 
 func Initilize() {
-	cfg := config.New(&config.Options{})
+	cfg, err := config.New()
+
+	if err != nil {
+		return
+	}
 
 	if cfg == nil {
-		panic("Config cannot be nil")
+		msg := "Config cannot be nil"
+		clog.Panic(msg, "initialize-injector", errors.New(msg), nil)
+		return
 	}
 
 	newSQL(cfg)
@@ -26,9 +34,7 @@ func Initilize() {
 
 func newSQL(cfg *config.Config) {
 	if cfg.Database != nil {
-		for _, c := range cfg.Database {
-			newDB, name := database.New(&c)
+			newDB, name := database.New(cfg.Database)
 			db[name] = newDB
 		}
-	}
 }

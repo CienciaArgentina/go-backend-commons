@@ -13,6 +13,7 @@ type ApiError interface {
 	Status() int
 	Message() string
 	Error() string
+	Errors() ErrorList
 	WithStatus(status int) *apiError
 	WithMessage(message string) *apiError
 	AddError(message, code string) *apiError
@@ -58,6 +59,10 @@ func (a *apiError) Error() string {
 	return a.errError.String()
 }
 
+func (a *apiError) Errors() ErrorList {
+	return a.errError
+}
+
 func (e ErrorList) String() string {
 	str, _ := j.ToJSONString(e)
 	return str
@@ -89,13 +94,12 @@ func NewBadRequestApiError(message string) ApiError {
 func NewMethodNotAllowedApiError() ApiError {
 	return &apiError{http.StatusMethodNotAllowed, "Method not allowed", NewErrorCause("Method not allowed", "method_not_allowed")}
 }
-
-func NewInternalServerApiError(message string, err error) ApiError {
-	error := ErrorList{}
+func NewInternalServerApiError(message string, err error, code string) ApiError {
+	errL := ErrorList{}
 	if err != nil {
-		error = append(error, err.Error())
+		errL = append(errL, NewErrorCause(err.Error(), code))
 	}
-	return &apiError{http.StatusInternalServerError, message, NewErrorCause(message, "internal_server_error")}
+	return &apiError{http.StatusInternalServerError, message, errL}
 }
 
 func NewForbiddenApiError(message string) ApiError {
@@ -108,7 +112,7 @@ func NewUnauthorizedApiError(message string) ApiError {
 
 func NewErrorFromBytesWithStatus(data []byte, status int) (ApiError, error) {
 	var apierror apiError
-	err := json.Unmarshal(data, status)
+	err := json.Unmarshal(data, &status)
 	if apierror.errStatus == 0 {
 		apierror.WithStatus(status)
 	}

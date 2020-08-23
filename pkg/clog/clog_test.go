@@ -56,20 +56,6 @@ func TestInfo(t *testing.T) {
 	require.Contains(t, output, "\"level\":\"info\",\"msg\":\"Test\",\"n\":\"1\"")
 }
 
-func TestWarn(t *testing.T) {
-	SetLogLevel(WarnLevel)
-	buffer := &bytes.Buffer{}
-	Logger.Out = buffer
-	for n := 0; n < 5; n++ {
-		Info("Test", "test", map[string]string{
-			"n": strconv.Itoa(n),
-		})
-	}
-	output := buffer.String()
-	Logger.Out = os.Stdout
-	require.Contains(t, output, "\"level\":\"warn\",\"msg\":\"Test\",\"n\":\"1\"")
-}
-
 func TestError(t *testing.T) {
 	SetLogLevel(ErrorLevel)
 	buffer := &bytes.Buffer{}

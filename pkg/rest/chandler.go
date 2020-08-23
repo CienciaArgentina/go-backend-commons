@@ -116,7 +116,7 @@ func apiFilter() gin.HandlerFunc {
 
 func internalServerErrorHandler(c *gin.Context, body []byte, status int) []byte {
 	if auth.IsPublicRequest(c.Request) {
-		msg, _ := json.Marshal(apierror.NewInternalServerApiError("Ocurrió un error en el servidor, por favor intentar nuevamente", nil))
+		msg, _ := json.Marshal(apierror.NewInternalServerApiError("Ocurrió un error en el servidor, por favor intentar nuevamente", nil, "internal_server_error"))
 		return msg
 	}
 
@@ -141,7 +141,7 @@ func recoverPanic(o io.Writer) gin.HandlerFunc {
 					pInfo := fmt.Sprintf("[RECOVERY] Panic recovered: \n%s\n%s\n%s%s", string(request), err, stack, []byte{27, 91, 48, 109})
 					logger.Printf(pInfo)
 				}
-				c.AbortWithStatusJSON(http.StatusInternalServerError, apierror.NewInternalServerApiError("Error interno del servidor, panic", errors.New(pInfo)))
+				c.AbortWithStatusJSON(http.StatusInternalServerError, apierror.NewInternalServerApiError("Error interno del servidor, panic", errors.New(pInfo), "internal_server_error"))
 			}
 		}()
 		c.Next()
