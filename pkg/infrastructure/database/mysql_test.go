@@ -10,8 +10,16 @@ import (
 )
 
 const (
-	FilePath = "../../../config/config.development.yml"
+	FilePath = "../../../config/config.development.yaml"
 )
+
+func SetEnvVariables() {
+	os.Setenv("DB_USERNAME", "user")
+	os.Setenv("DB_PASSWORD", "password")
+	os.Setenv("DB_HOSTNAME", "hostname")
+	os.Setenv("DB_PORT", "port")
+	os.Setenv("DB_NAME", "name")
+}
 
 func TestNewShouldPanicIfConfigIsNil(t *testing.T) {
 	require.Panics(t, func() {
@@ -20,37 +28,22 @@ func TestNewShouldPanicIfConfigIsNil(t *testing.T) {
 }
 
 func TestNewShouldReturnMockWhenScopeIsTesting(t *testing.T) {
+	SetEnvVariables()
 	tmpScope := scope.GetScope()
 	tmpCloud := scope.IsCloud()
 	os.Setenv(scope.Scope, scope.Testing)
 	os.Setenv(scope.IsCloudKey, "true")
-	cfg := config.New(&config.Options{
-		FilePath: FilePath,
-	})
-	db, _ := New(&cfg.Database[0])
+	cfg, _ := config.New()
+	db, _ := New(cfg.Database)
 	os.Setenv(scope.Scope, tmpScope)
 	os.Setenv(scope.IsCloudKey, strconv.FormatBool(tmpCloud))
 	require.NotNil(t, db.Mock)
 }
 
-func TestNewShouldPanicWhenTheresNoPasswordInEnvironment(t *testing.T) {
-	cfg := config.New(&config.Options{
-		FilePath: FilePath,
-	})
-	require.Panics(t, func() {
-		New(&cfg.Database[0])
-	})
-}
-
 func TestNewShouldPanicPingingDb(t *testing.T) {
-	os.Setenv("db_pass", "test")
-	os.Setenv("db_host", "test")
-	cfg := config.New(&config.Options{
-		FilePath: FilePath,
-	})
+	SetEnvVariables()
+	cfg, _ := config.New()
 	require.Panics(t, func() {
-		New(&cfg.Database[0])
+		New(cfg.Database)
 	})
-	os.Setenv("db_pass", "")
-	os.Setenv("db_host", "")
 }

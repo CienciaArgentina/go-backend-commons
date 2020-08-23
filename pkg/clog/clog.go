@@ -3,6 +3,7 @@ package clog
 import (
 	"fmt"
 	"github.com/sirupsen/logrus"
+	"io"
 	"os"
 	"strings"
 )
@@ -120,4 +121,8 @@ func formatFields(tags map[string]string) logrus.Fields {
 		}
 	}
 	return fields
+}
+
+func GetOut() io.Writer {
+	return Logger.Out
 }

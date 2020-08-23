@@ -1,27 +1,29 @@
 package config
 
 import (
-	"fmt"
-	"github.com/CienciaArgentina/go-backend-commons/pkg/scope"
-	"gopkg.in/yaml.v2"
-	"io/ioutil"
+	"errors"
+	"github.com/CienciaArgentina/go-backend-commons/pkg/clog"
+	"os"
+)
+
+const (
+	envDBUsername = "DB_USERNAME"
+	envDBPassword = "DB_PASSWORD"
+	envDBHostname = "DB_HOSTNAME"
+	EnvDBName = "DB_NAME"
+	envDBPort = "DB_PORT"
 )
 
 type Config struct {
-	ApiKey   string     `yaml:"apikey"`
-	Database []Database `yaml:"database"`
-	Server   Server     `yaml:"server"`
+	Database *Database
 }
 
 type Database struct {
-	Username string `yaml:"username"`
-	Password string `yaml:"password"` // This is the name of the environment variable, not the actual value
-	Hostname string `yaml:"hostname"` // This is the name of the environment variable, not the actual value
-	Database string `yaml:"database"`
-}
-
-type Server struct {
-	Port string `yaml:"server_port"`
+	Username string
+	Password string
+	Hostname string
+	Database string
+	Port string
 }
 
 type Options struct {
@@ -30,54 +32,56 @@ type Options struct {
 	IsCloud  bool
 }
 
-func New(o ...*Options) *Config {
-	c := &Config{}
-
-	if o == nil {
-		o = []*Options{}
-	}
-
-	if o[0] == nil {
-		o[0] = SetDefaultOptions()
-	}
-
-	if o[0].Scope == "" {
-		if scope.IsCloud() {
-			if scope.IsProductiveScope() {
-				o[0].Scope = scope.GetScope()
-			} else {
-				o[0].Scope = scope.Development
-			}
-		} else {
-			o[0].Scope = scope.Local
-		}
-	}
-
-	var data []byte
-	var err error
-
-	if o[0].FilePath == "" {
-		data, err = ioutil.ReadFile(fmt.Sprintf("./config/config.%s.yml", o[0].Scope))
-	} else {
-		data, err = ioutil.ReadFile(o[0].FilePath)
-	}
-
+func New() (*Config, error) {
+	db, err := getDBEnv()
 	if err != nil {
-		panic(err)
+		clog.Panic("Error with database config", "new-config", err, nil)
+		return nil, err
 	}
 
-	err = yaml.Unmarshal(data, &c)
-	if err != nil {
-		panic(err)
-	}
+	cfg := &Config{Database: db}
 
-	return c
+	return cfg, nil
 }
 
-func SetDefaultOptions() *Options {
-	return &Options{
-		FilePath: "",
-		Scope:    scope.Local,
-		IsCloud:  false,
+func getDBEnv() (*Database, error) {
+	username := os.Getenv(envDBUsername)
+	password := os.Getenv(envDBPassword)
+	hostname := os.Getenv(envDBHostname)
+	name := os.Getenv(EnvDBName)
+	port := os.Getenv(envDBPort)
+	db := &Database{
+		Username: username,
+		Password: password,
+		Hostname: hostname,
+		Database: name,
+		Port:     port,
 	}
+
+	return db, db.IsValid()
 }
+
+func (d *Database) IsValid() error {
+	if d.Username == "" {
+		return errors.New("missing database username")
+	}
+
+	if d.Password == "" {
+		return errors.New("missing database password")
+	}
+
+	if d.Hostname == "" {
+		return errors.New("missing database hostname")
+	}
+
+	if d.Database == "" {
+		return errors.New("missing database name")
+	}
+
+	if d.Port == "" {
+		return errors.New("missing database port")
+	}
+
+	return nil
+}
+

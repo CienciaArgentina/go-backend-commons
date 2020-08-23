@@ -1,12 +1,13 @@
 package database
 
 import (
+	"errors"
 	"fmt"
 	"github.com/CienciaArgentina/go-backend-commons/config"
+	"github.com/CienciaArgentina/go-backend-commons/pkg/clog"
 	"github.com/CienciaArgentina/go-backend-commons/pkg/scope"
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/jmoiron/sqlx"
-	"os"
 	"strings"
 )
 
@@ -27,25 +28,14 @@ func New(cfg *config.Database) (*Database, string) {
 		return &Database{Database: sqlxDb, Mock: mock}, cfg.Database
 	}
 
-	if cfg.Username == "" || cfg.Database == "" || cfg.Hostname == "" || cfg.Password == "" {
-		panic("Invalid DB config")
-	}
-
 	dbName := FormatDbName(cfg.Database)
 
-	if actualScope := scope.GetScope(); actualScope != scope.Local {
-		cfg.Password = os.Getenv(cfg.Password)
-		cfg.Hostname = os.Getenv(cfg.Hostname)
-	}
-
-	if cfg.Password == "" || cfg.Hostname == "" {
-		panic("There's no environment variable with a valid password or hostname")
-	}
-
-	db, _ := sqlx.Open(MySQL, fmt.Sprintf("%s:%s@(%s)/%s", cfg.Username, cfg.Password, cfg.Hostname, cfg.Database))
+	db, _ := sqlx.Open(MySQL, fmt.Sprintf("%s:%s@(%s:%s)/%s", cfg.Username, cfg.Password, cfg.Hostname, cfg.Port, cfg.Database))
 
 	if err := db.Ping(); err != nil {
-		panic(err)
+		msg := "error pinging db"
+		clog.Panic(msg, "new-mysql", errors.New(msg), nil)
+		return nil, ""
 	}
 
 	return &Database{Database: db}, dbName
