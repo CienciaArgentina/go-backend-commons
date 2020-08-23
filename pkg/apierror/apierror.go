@@ -1,100 +1,41 @@
 package apierror
 
 import (
-	"github.com/CienciaArgentina/go-backend-commons/pkg/json"
+	"encoding/json"
 	"net/http"
-)
 
-//type ErrorList []interface{}
-//
-//type ApiError interface {
-//	Message() string
-//	Code() string      // ex. invalid_user
-//	Status() int       // http status code
-//	Errors() ErrorList // detailed error list
-//}
-//
-//type apiError struct {
-//	ErrorMessage string    `json:"message"`
-//	ErrorCode    string    `json:"code"`
-//	ErrorStatus  int       `json:"status"`
-//	ErrorList    ErrorList `json:"errors"`
-//}
-//
-//func New(message, code string, status int, errors ErrorList) ApiError {
-//	return apiError{message, code, status, errors}
-//}
-//
-//func (e ErrorList) ToString() string {
-//	return fmt.Sprint(e)
-//}
-//
-//func (e apiError) Code() string {
-//	return e.ErrorCode
-//}
-//
-//func (e apiError) Status() int {
-//	return e.ErrorStatus
-//}
-//
-//func (e apiError) Message() string {
-//	return e.ErrorMessage
-//}
-//
-//func (e apiError) Errors() ErrorList {
-//	return e.ErrorList
-//}
-//
-//func NewNotFoundApiError(message string) ApiError {
-//	return apiError{message, "not_found", http.StatusNotFound, ErrorList{}}
-//}
-//
-//func NewBadRequestApiError(message string) ApiError {
-//	return apiError{message, "bad_request", http.StatusBadRequest, ErrorList{}}
-//}
-//
-//func NewMethodNotAllowedApiError() ApiError {
-//	return apiError{"Method not allowed", "method_not_allowed", http.StatusMethodNotAllowed, ErrorList{}}
-//}
-//
-//func NewInternalServerApiError(message string, err error) ApiError {
-//	error := ErrorList{}
-//	if err != nil {
-//		error = append(error, err.Error())
-//	}
-//	return apiError{message, "internal_server_error", http.StatusInternalServerError, error}
-//}
-//
-//func NewForbiddenApiError(message string) ApiError {
-//	return apiError{message, "forbidden", http.StatusForbidden, ErrorList{}}
-//}
-//
-//func NewUnauthorizedApiError(message string) ApiError {
-//	return apiError{message, "unauthorized_scopes", http.StatusUnauthorized, ErrorList{}}
-//}
+	j "github.com/CienciaArgentina/go-backend-commons/pkg/json"
+)
 
 type ErrorList []interface{}
 
 type ApiError interface {
 	Status() int
 	Message() string
-	Error() ErrorList
-	AddError(message, code string)
+	Error() string
+	Errors() ErrorList
+	WithStatus(status int) *apiError
+	WithMessage(message string) *apiError
+	AddError(message, code string) *apiError
 }
 
 type apiError struct {
-	ErrStatus int `json:"status"`
-	ErrMessage string `json:"message"`
-	ErrError ErrorList `json:"error"`
+	errStatus  int       `json:"status"`
+	errMessage string    `json:"message"`
+	errError   ErrorList `json:"error"`
 }
 
 type ErrorCause struct {
 	Detail string `json:"detail"`
-	Code string `json:"code"`
+	Code   string `json:"code"`
 }
 
 func New(status int, message string, error ErrorList) ApiError {
-	return &apiError{ErrStatus:status, ErrMessage:message, ErrError:error}
+	return &apiError{errStatus: status, errMessage: message, errError: error}
+}
+
+func NewWithStatus(status int) ApiError {
+	return &apiError{errStatus: status}
 }
 
 func NewErrorCause(detail, code string) ErrorList {
@@ -107,24 +48,39 @@ func NewErrorCause(detail, code string) ErrorList {
 }
 
 func (a *apiError) Status() int {
-	return a.ErrStatus
+	return a.errStatus
 }
 
 func (a *apiError) Message() string {
-	return a.ErrMessage
+	return a.errMessage
 }
 
-func (a *apiError) Error() ErrorList {
-	return a.ErrError
+func (a *apiError) Error() string {
+	return a.errError.String()
 }
 
-func (e ErrorList) ToString() string {
-	str, _ := json.ToJSONString(e)
+func (a *apiError) Errors() ErrorList {
+	return a.errError
+}
+
+func (e ErrorList) String() string {
+	str, _ := j.ToJSONString(e)
 	return str
 }
 
-func (a *apiError) AddError(message, code string)  {
-	a.ErrError = append(a.ErrError, ErrorCause{message, code})
+func (a *apiError) AddError(message, code string) *apiError {
+	a.errError = append(a.errError, ErrorCause{message, code})
+	return a
+}
+
+func (a *apiError) WithStatus(status int) *apiError {
+	a.errStatus = status
+	return a
+}
+
+func (a *apiError) WithMessage(message string) *apiError {
+	a.errMessage = message
+	return a
 }
 
 func NewNotFoundApiError(message string) ApiError {
@@ -136,15 +92,14 @@ func NewBadRequestApiError(message string) ApiError {
 }
 
 func NewMethodNotAllowedApiError() ApiError {
-	return &apiError{http.StatusMethodNotAllowed, "Method not allowed", NewErrorCause("Method not allowed","method_not_allowed")}
+	return &apiError{http.StatusMethodNotAllowed, "Method not allowed", NewErrorCause("Method not allowed", "method_not_allowed")}
 }
-
-func NewInternalServerApiError(message string, err error) ApiError {
-	error := ErrorList{}
+func NewInternalServerApiError(message string, err error, code string) ApiError {
+	errL := ErrorList{}
 	if err != nil {
-		error = append(error, err.Error())
+		errL = append(errL, NewErrorCause(err.Error(), code))
 	}
-	return &apiError{http.StatusInternalServerError, message, NewErrorCause(message, "internal_server_error")}
+	return &apiError{http.StatusInternalServerError, message, errL}
 }
 
 func NewForbiddenApiError(message string) ApiError {
@@ -153,4 +108,13 @@ func NewForbiddenApiError(message string) ApiError {
 
 func NewUnauthorizedApiError(message string) ApiError {
 	return &apiError{http.StatusUnauthorized, message, NewErrorCause(message, "unauthorized_scopes")}
+}
+
+func NewErrorFromBytesWithStatus(data []byte, status int) (ApiError, error) {
+	var apierror apiError
+	err := json.Unmarshal(data, &status)
+	if apierror.errStatus == 0 {
+		apierror.WithStatus(status)
+	}
+	return &apierror, err
 }
