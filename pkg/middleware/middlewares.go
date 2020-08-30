@@ -49,7 +49,7 @@ func ResponseMiddleware(c *gin.Context) {
 		return
 	}
 
-	err := apiErrors.NewInternalServerApiError("Expected a response body", nil)
+	err := apiErrors.NewInternalServerApiError("Expected a response body", nil, "")
 	c.AbortWithError(err.Status(), err)
 }
 
@@ -61,13 +61,13 @@ func ErrorMiddleware(c *gin.Context) {
 	}
 
 	ginErr := c.Errors.Last()
-	apiErr := apiErrors.NewInternalServerApiError("Internal server error", ginErr)
+	apiErr := apiErrors.NewInternalServerApiError("Internal server error", ginErr, "")
 	if ginAPIErr, ok := ginErr.Err.(apiErrors.ApiError); ok {
 		apiErr = ginAPIErr
 	}
 
 	c.JSON(apiErr.Status(), apiErr)
 	if !c.IsAborted() {
-		c.AbortWithStatus(apiErr.Status())
+		c.AbortWithStatusJSON(apiErr.Status(), apiErr)
 	}
 }
