@@ -15,6 +15,10 @@ const (
 	ResponseCodeKey = "responseCode"
 	// ResponseBodyKey Key that's searched for in gin.Context to set response body
 	ResponseBodyKey = "responseBody"
+	// codeNoResponseBody No response body code
+	codeNoResponseBody = "no_response_body"
+	// codeInternalError Internal error code
+	codeInternalError = "internal_error"
 )
 
 // AdaptController Adapts controller to gin middleware
@@ -49,7 +53,7 @@ func ResponseMiddleware(c *gin.Context) {
 		return
 	}
 
-	err := apiErrors.NewInternalServerApiError("Expected a response body", nil, "")
+	err := apiErrors.NewInternalServerApiError("Expected a response body", nil, codeNoResponseBody)
 	c.AbortWithError(err.Status(), err)
 }
 
@@ -61,7 +65,7 @@ func ErrorMiddleware(c *gin.Context) {
 	}
 
 	ginErr := c.Errors.Last()
-	apiErr := apiErrors.NewInternalServerApiError("Internal server error", ginErr, "")
+	apiErr := apiErrors.NewInternalServerApiError("Internal server error", ginErr, codeInternalError)
 	if ginAPIErr, ok := ginErr.Err.(apiErrors.ApiError); ok {
 		apiErr = ginAPIErr
 	}
