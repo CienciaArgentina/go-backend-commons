@@ -20,9 +20,9 @@ type ApiError interface {
 }
 
 type apiError struct {
-	errStatus  int       `json:"status"`
-	errMessage string    `json:"message"`
-	errError   ErrorList `json:"error"`
+	ErrStatus  int       `json:"status"`
+	ErrMessage string    `json:"message"`
+	ErrError   ErrorList `json:"error"`
 }
 
 type ErrorCause struct {
@@ -31,11 +31,11 @@ type ErrorCause struct {
 }
 
 func New(status int, message string, error ErrorList) ApiError {
-	return &apiError{errStatus: status, errMessage: message, errError: error}
+	return &apiError{ErrStatus: status, ErrMessage: message, ErrError: error}
 }
 
 func NewWithStatus(status int) ApiError {
-	return &apiError{errStatus: status}
+	return &apiError{ErrStatus: status}
 }
 
 func NewErrorCause(detail, code string) ErrorList {
@@ -48,19 +48,19 @@ func NewErrorCause(detail, code string) ErrorList {
 }
 
 func (a *apiError) Status() int {
-	return a.errStatus
+	return a.ErrStatus
 }
 
 func (a *apiError) Message() string {
-	return a.errMessage
+	return a.ErrMessage
 }
 
 func (a *apiError) Error() string {
-	return a.errError.String()
+	return a.ErrError.String()
 }
 
 func (a *apiError) Errors() ErrorList {
-	return a.errError
+	return a.ErrError
 }
 
 func (e ErrorList) String() string {
@@ -69,17 +69,17 @@ func (e ErrorList) String() string {
 }
 
 func (a *apiError) AddError(message, code string) *apiError {
-	a.errError = append(a.errError, ErrorCause{message, code})
+	a.ErrError = append(a.ErrError, ErrorCause{message, code})
 	return a
 }
 
 func (a *apiError) WithStatus(status int) *apiError {
-	a.errStatus = status
+	a.ErrStatus = status
 	return a
 }
 
 func (a *apiError) WithMessage(message string) *apiError {
-	a.errMessage = message
+	a.ErrMessage = message
 	return a
 }
 
@@ -113,7 +113,7 @@ func NewUnauthorizedApiError(message string) ApiError {
 func NewErrorFromBytesWithStatus(data []byte, status int) (ApiError, error) {
 	var apierror apiError
 	err := json.Unmarshal(data, &status)
-	if apierror.errStatus == 0 {
+	if apierror.ErrStatus == 0 {
 		apierror.WithStatus(status)
 	}
 	return &apierror, err

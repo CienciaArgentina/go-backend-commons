@@ -4,6 +4,7 @@ import (
 	"errors"
 	"net/http"
 	"net/http/httptest"
+	"reflect"
 	"testing"
 
 	apiErrors "github.com/CienciaArgentina/go-backend-commons/pkg/apierror"
@@ -151,9 +152,11 @@ func TestErrorMiddlewareGinError(t *testing.T) {
 		t.Errorf("Expected status code %d but got %d", expectedStatusCode, resp.Result().StatusCode)
 	}
 }
+
 func TestErrorMiddlewareAPIError(t *testing.T) {
 	resp := httptest.NewRecorder()
 	expectedStatusCode := http.StatusForbidden
+	expectedBody := `{"status":403,"message":"You shall not pass!","error":[{"detail":"You shall not pass!","code":"forbidden"}]}`
 	gin.SetMode(gin.TestMode)
 	c, r := gin.CreateTestContext(resp)
 
@@ -168,5 +171,8 @@ func TestErrorMiddlewareAPIError(t *testing.T) {
 
 	if resp.Result().StatusCode != expectedStatusCode {
 		t.Errorf("Expected status code %d but got %d", expectedStatusCode, resp.Result().StatusCode)
+	}
+	if reflect.DeepEqual(resp.Body.Bytes(), expectedBody) {
+		t.Errorf("Expected body %s but got %+v", expectedBody, string(resp.Body.Bytes()))
 	}
 }

@@ -50,14 +50,14 @@ func TestAddErrorShouldAddError(t *testing.T) {
 }
 
 func TestWithStatusShouldSetStatus(t *testing.T) {
-	expected := &apiError{errStatus: http.StatusBadRequest}
+	expected := &apiError{ErrStatus: http.StatusBadRequest}
 	err := NewWithStatus(http.StatusInternalServerError)
 	err.WithStatus(http.StatusBadRequest)
 	require.Equal(t, expected, err)
 }
 
 func TestWithMessageShouldSetErrMsg(t *testing.T) {
-	expected := &apiError{errMessage: "test", errStatus: http.StatusBadRequest}
+	expected := &apiError{ErrMessage: "test", ErrStatus: http.StatusBadRequest}
 	err := NewWithStatus(http.StatusBadRequest)
 	err.WithMessage("test")
 	require.Equal(t, expected, err)
