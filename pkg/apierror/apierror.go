@@ -97,7 +97,7 @@ func NewMethodNotAllowedApiError() ApiError {
 func NewInternalServerApiError(message string, err error, code string) ApiError {
 	errL := ErrorList{}
 	if err != nil {
-		errL = append(errL, NewErrorCause(err.Error(), code))
+		errL = NewErrorCause(err.Error(), code)
 	}
 	return &apiError{http.StatusInternalServerError, message, errL}
 }
