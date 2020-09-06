@@ -59,6 +59,10 @@ type cienciaArgentinaRest struct {
 	context      context.Context // nolint
 }
 
+func NewClient() Client {
+	return &restClient{}
+}
+
 func (r *restClient) NewRequest(c ...*gin.Context) CienciaArgentinaRest {
 	ca := &cienciaArgentinaRest{}
 

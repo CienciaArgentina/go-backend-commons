@@ -19,16 +19,25 @@ import (
 	"github.com/CienciaArgentina/go-backend-commons/pkg/auth"
 	"github.com/CienciaArgentina/go-backend-commons/pkg/clog"
 	"github.com/CienciaArgentina/go-backend-commons/pkg/scope"
+	"github.com/gin-contrib/gzip"
 	"github.com/gin-gonic/gin"
 )
 
-func CustomCienciaArgentinaRouter() *gin.Engine {
+type RouterConfig struct {
+	Gzip bool
+}
+
+func CustomCienciaArgentinaRouter(cfg RouterConfig) *gin.Engine {
 	r := gin.New()
 	r.Use(apiFilter())
 	r.Use(recoverPanic(clog.GetOut()))
 
 	if !scope.IsProductiveScope() {
 		r.Use(gin.Logger())
+	}
+
+	if cfg.Gzip {
+		r.Use(gzip.Gzip(gzip.DefaultCompression))
 	}
 
 	r.NoRoute(noRouteHandler)
