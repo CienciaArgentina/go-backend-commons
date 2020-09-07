@@ -18,4 +18,3 @@ type cienciaArgentinaResponse struct {
 	*response
 	executionTime int64
 }
-
