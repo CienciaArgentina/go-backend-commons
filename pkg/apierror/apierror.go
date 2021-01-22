@@ -22,7 +22,7 @@ type ApiError interface {
 type apiError struct {
 	ErrStatus  int       `json:"status"`
 	ErrMessage string    `json:"message"`
-	ErrError   ErrorList `json:"error"`
+	ErrError   ErrorList `json:"errors"`
 }
 
 type ErrorCause struct {
